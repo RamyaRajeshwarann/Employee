@@ -1,0 +1,25 @@
+generator client {
+  provider        = "prisma-client-go"
+  previewFeatures = ["driverAdapters", "postgresqlExtensions", "multiSchema"]
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+  schemas    = ["employee"]
+}
+
+model employee {
+  id              Int      @id @default(autoincrement()) 
+  name            String  
+  email           String
+  phone           String   
+  location        String
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+  
+
+  @@schema("employee")
+}
