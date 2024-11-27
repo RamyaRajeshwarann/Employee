@@ -73,7 +73,55 @@ func createEmployeeHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(createdEmployee)
 }
-
+func getEmployeesHandler(w http.ResponseWriter, r *http.Request) {
+    query := r.URL.Query()
+    pageStr := query.Get("page")
+    limitStr := query.Get("limit")
+    page := 1
+    limit := 10
+    if pageStr != "" {
+        p, err := strconv.Atoi(pageStr)
+        if err == nil && p > 0 {
+            page = p
+        }
+    }
+    if limitStr != "" {
+        l, err := strconv.Atoi(limitStr)
+        if err == nil && l > 0 {
+            limit = l
+        }
+    }
+    offset := (page - 1) * limit
+    employees, err := client.Employee.FindMany().
+        Take(limit).
+        Skip(offset).
+        Exec(r.Context())
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    var totalEmployees int
+    countQuery := `SELECT COUNT(*) FROM "Employee"`
+    if err := client.Prisma.QueryRaw(countQuery).Exec(r.Context(), &totalEmployees); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    response := struct {
+        Data       []db.EmployeeModel `json:"data"`
+        Total      int                `json:"total"`
+        Page       int                `json:"page"`
+        Limit      int                `json:"limit"`
+        TotalPages int                `json:"totalPages"`
+    }{
+        Data:       employees,
+        Total:      totalEmployees,
+        Page:       page,
+        Limit:      limit,
+        TotalPages: (totalEmployees + limit - 1) / limit, 
+    }
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(response)
+}
 func updateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     idStr := vars["id"]
