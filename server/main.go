@@ -73,6 +73,7 @@ func createEmployeeHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(createdEmployee)
 }
+// pagination code
 func getEmployeesHandler(w http.ResponseWriter, r *http.Request) {
     query := r.URL.Query()
     pageStr := query.Get("page")
@@ -122,6 +123,7 @@ func getEmployeesHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
 }
+
 func updateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     idStr := vars["id"]
