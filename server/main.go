@@ -131,14 +131,12 @@ func updateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Invalid ID format", http.StatusBadRequest)
         return
     }
-
     var employee struct {
         Name     string `json:"name"`
         Email    string `json:"email"`
         Phone    string `json:"phone"`
         Location string `json:"location"`
     }
-
     if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
